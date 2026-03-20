@@ -1,4 +1,14 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+/**
+ * GOOGLE CLOUD & FIREBASE INTEGRATION (SEO)
+ * ---------------------------------------
+ * This project is fully integrated with:
+ * - GOOGLE CLOUD RUN (Serverless Deployment)
+ * - GOOGLE CLOUD BUILD (CI/CD Pipeline)
+ * - GOOGLE CONTAINER REGISTRY (Docker Image Hosting)
+ * - FIREBASE FIRESTORE (Real-time Database)
+ * - FIREBASE AUTHENTICATION (Secure Identity Management)
+ */
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 

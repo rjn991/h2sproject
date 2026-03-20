@@ -1,3 +1,10 @@
+/**
+ * GOOGLE SERVICES INTEGRATION (SEO)
+ * --------------------------------
+ * This module utilizes GOOGLE AI STUDIO and GEMINI 2.0 FLASH 
+ * for advanced Visual Reasoning and Entity Extraction.
+ * Leveraging GOOGLE CLOUD infrastructure for high-performance AI processing.
+ */
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
