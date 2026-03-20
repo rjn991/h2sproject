@@ -56,31 +56,48 @@ export function Scanner() {
         className="hidden"
         ref={fileInputRef}
         onChange={handleFileChange}
+        data-testid="file-input"
+        aria-hidden="true"
+        tabIndex={-1}
       />
 
       <button
         onClick={triggerCapture}
         disabled={isProcessing}
+        aria-busy={isProcessing}
+        aria-label={
+          isProcessing 
+            ? "Processing your donation note" 
+            : status === "success" 
+              ? "Scanning completed successfully" 
+              : "Scan handwritten donation note"
+        }
         className={cn(
-          "w-full aspect-square max-w-[320px] rounded-[40px] flex flex-col items-center justify-center space-y-4 transition-all active:scale-95 shadow-2xl",
+          "w-full aspect-square max-w-[320px] rounded-[40px] flex flex-col items-center justify-center space-y-4 transition-all active:scale-95 shadow-2xl focus-visible:ring-4 focus-visible:ring-blue-400 outline-none",
           isProcessing ? "bg-slate-100" : "bg-blue-600 hover:bg-blue-700",
           status === "success" && "bg-green-600",
           status === "error" && "bg-red-600"
         )}
       >
         {isProcessing ? (
-          <Loader2 className="w-24 h-24 text-blue-600 animate-spin" />
+          <Loader2 className="w-24 h-24 text-blue-600 animate-spin" aria-hidden="true" />
         ) : status === "success" ? (
-          <CheckCircle2 className="w-24 h-24 text-white" />
+          <CheckCircle2 className="w-24 h-24 text-white" aria-hidden="true" />
         ) : status === "error" ? (
-          <AlertCircle className="w-24 h-24 text-white" />
+          <AlertCircle className="w-24 h-24 text-white" aria-hidden="true" />
         ) : (
-          <Camera className="w-24 h-24 text-white" />
+          <Camera className="w-24 h-24 text-white" aria-hidden="true" />
         )}
-        <span className="text-3xl font-black text-white uppercase tracking-tight">
+        <span className="text-3xl font-black text-white uppercase tracking-tight" aria-hidden="true">
           {isProcessing ? "Scanning..." : status === "success" ? "Done!" : "Scan Note"}
         </span>
       </button>
+
+      <div role="status" aria-live="polite" className="sr-only">
+        {isProcessing && "Analyzing your photo with AI, please wait..."}
+        {status === "success" && "Success! Your donation has been recorded."}
+        {status === "error" && "Error processing note. Please try a clearer photo."}
+      </div>
 
       {status === "success" && (
         <div className="bg-green-100 border-2 border-green-500 rounded-2xl p-6 text-center">
@@ -100,7 +117,7 @@ export function Scanner() {
       
       {preview && !isProcessing && status === "idle" && (
         <div className="relative w-full aspect-video rounded-2xl overflow-hidden border-4 border-slate-200">
-          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+          <img src={preview} alt="Captured donation note preview" className="w-full h-full object-cover" />
         </div>
       )}
     </div>

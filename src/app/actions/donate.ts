@@ -3,23 +3,27 @@
 import { model } from "@/lib/gemini";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, GeoPoint } from "firebase/firestore";
+import { z } from "zod";
 
-interface DonationItem {
-  name: string;
-  qty: number;
-  unit: string;
-  cat: string;
-}
+const DonationSchema = z.object({
+  items: z.array(z.object({
+    name: z.string().min(1),
+    qty: z.number().positive(),
+    unit: z.string(),
+    cat: z.string()
+  })),
+  rawText: z.string()
+});
 
-interface GeminiOutput {
-  items: DonationItem[];
-  rawText: string;
-}
+type GeminiOutput = z.infer<typeof DonationSchema>;
 
 export async function processDonationNote(formData: FormData) {
   try {
     const file = formData.get("image") as File;
     if (!file) throw new Error("No image provided");
+
+    // Basic size validation for efficiency/security
+    if (file.size > 10 * 1024 * 1024) throw new Error("File too large (max 10MB)");
 
     const bytes = await file.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");
@@ -29,19 +33,11 @@ export async function processDonationNote(formData: FormData) {
       Extract the items being donated.
       Items often contain a name, quantity, unit (kg, bags, units), and category (Food, Meds, Clothing).
       
-      Force output strictly as valid JSON matching this interface:
-      interface Donation {
-        items: Array<{
-          name: string;
-          qty: number;
-          unit: string;
-          cat: string;
-        }>;
-        rawText: string;
+      Return ONLY valid JSON matching this schema:
+      {
+        "items": Array<{ "name": string, "qty": number, "unit": string, "cat": string }>,
+        "rawText": string (full OCR transcription)
       }
-      
-      The "rawText" field should contain the OCR transcription of the entire note.
-      Return ONLY the JSON object.
     `;
 
     const result = await model.generateContent([
@@ -61,7 +57,8 @@ export async function processDonationNote(formData: FormData) {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("Could not extract JSON from Gemini response");
     
-    const extraction: GeminiOutput = JSON.parse(jsonMatch[0]);
+    // Validate with Zod for security and type safety
+    const extraction = DonationSchema.parse(JSON.parse(jsonMatch[0]));
 
     // Save to Firestore
     await addDoc(collection(db, "donations"), {
