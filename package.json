@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "deploy": "gcloud builds submit --config cloudbuild.yaml",
+    "logs": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=bridgelink\" --limit 30 --format=\"table(timestamp,severity,textPayload)\"",
+    "logs:error": "gcloud logging read \"resource.type=cloud_run_revision AND resource.labels.service_name=bridgelink AND severity>=ERROR\" --limit 30 --format=\"table(timestamp,severity,textPayload)\""
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
